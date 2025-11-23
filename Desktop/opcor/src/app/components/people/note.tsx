@@ -2,12 +2,9 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { GlobeIcon, LinkedinIcon, TwitterIcon, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { GlobeIcon, LinkedinIcon, TwitterIcon, ArrowUpRight, Plus, Minus, type LucideProps } from 'lucide-react';
 import Link from 'next/link';
-
-// ============================================
-// EDITABLE DATA SECTION - EDIT YOUR TEAM HERE
-// ============================================
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface FundedProject {
   title: string;
@@ -16,7 +13,7 @@ interface FundedProject {
 
 interface TeamMember {
   name: string;
-  position: string; // e.g., "Head of AI", "Head of Tech", etc.
+  position: string;
   image?: string;
   bio?: string;
   linkedin?: string;
@@ -26,9 +23,9 @@ interface TeamMember {
 }
 
 interface TeamSection {
-  title: string; // e.g., "Founders", "Executives", "Directors", etc.
+  title: string;
   members: TeamMember[];
-  defaultExpanded?: boolean; // Whether this section is expanded by default
+  defaultExpanded?: boolean;
 }
 
 const TEAM_DATA: TeamSection[] = [
@@ -38,9 +35,9 @@ const TEAM_DATA: TeamSection[] = [
     members: [
       {
         name: 'Aditya Raj',
-        position: '',
+        position: 'Founder',
         image: '/team/aditya_dp.jpg',
-        bio: 'Aditya is a final-year UG student at NIT Patna with 4 years of coding experience and 3 years of AI research at IITs, IIITH and BITS Goa. He qualified Regional Mathematical Olympiad and National Standard Examination in Astronomy. This work has led to an invitation to the M2L Summer School in Croatia, and a role as an AI Researcher at a Finance Startup. Currently focused on AI Safety and Internal Representation  .',
+        bio: 'I established OPCOR on a fundamental conviction: that the friction between a radical idea and its realization must be eliminated. Our mandate is to underwrite the material costs of exploration so that the inventor is free to focus solely on the invention. We are cultivating a high-velocity ecosystem—a crucible where intellectual property is not hoarded in silos, but collided in the open. We operate under the belief that the intractable problems of AI and engineering will no longer yield to the solitary genius. Instead, they demand a collective nervous system of builders, thinkers, and outliers, all working in absolute concert.',
         linkedin: 'https://www.linkedin.com/in/hexronus/',
         website: 'https://hexronuspi.github.io/',
         fundedProjects: []
@@ -48,194 +45,191 @@ const TEAM_DATA: TeamSection[] = [
     ]
   },
   {
-    title: 'Research Team',
-    defaultExpanded: true,
+    title: 'Research Patron',
+    defaultExpanded: false,
     members: [
-      // Research fellows and scientists will be added here
-      // We unite exceptional innovators to advance computation and science
     ]
   },
   {
     title: 'Advisory Board',
     defaultExpanded: false,
     members: [
-      // Advisors and mentors helping us set the standard that rivals the best labs worldwide
     ]
   }
 ];
 
-// ============================================
-// COMPONENT CODE - DO NOT EDIT BELOW THIS LINE
-// ============================================
+const SocialLink = ({ href, icon: Icon }: { href: string; icon: React.ComponentType<LucideProps> }) => (
+  <Link
+    href={href}
+    target="_blank"
+    className="p-2 rounded-full border border-black/10 hover:bg-black hover:text-white hover:border-black transition-all duration-300 group"
+  >
+    <Icon size={14} strokeWidth={1.5} />
+  </Link>
+);
 
 const PersonCard = ({ member }: { member: TeamMember }) => {
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200/50 hover:border-[#6349E8]/30 flex flex-col h-full">
-      {/* Image */}
-      {member.image && (
-        <div className="relative w-32 h-32 mx-auto mb-4">
-          <Image
-            src={member.image}
-            alt={`${member.name}'s Profile Picture`}
-            className="rounded-full object-cover border-4 border-gray-200 shadow-md"
-            fill
-            sizes="128px"
-          />
+    <div className="group relative bg-white border border-black/5 hover:border-black/20 transition-all duration-500 overflow-hidden flex flex-col h-full">
+      <div className="flex justify-between items-start p-6 border-b border-black/5 bg-[#FAFAFA]">
+        <div className="font-mono text-xs uppercase tracking-widest text-gray-500 pt-1">
+          {member.position || "MEMBER"}
         </div>
-      )}
-
-      {/* Name */}
-      <h3 className="text-xl font-bold text-gray-900 text-center mb-1">
-        {member.name}
-      </h3>
-
-      {/* Position */}
-      <p className="text-sm font-semibold text-[#6349E8] text-center mb-4">
-        {member.position}
-      </p>
-
-      {/* Social Links */}
-      {(member.linkedin || member.website || member.twitter) && (
-        <div className="flex items-center justify-center space-x-4 mb-4">
-          {member.website && (
-            <Link
-              href={member.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-500 hover:text-[#6349E8] transition-colors duration-300"
-              aria-label="Personal Website"
-            >
-              <GlobeIcon className="w-5 h-5" />
-            </Link>
-          )}
-          {member.linkedin && (
-            <Link
-              href={member.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-500 hover:text-[#6349E8] transition-colors duration-300"
-              aria-label="LinkedIn Profile"
-            >
-              <LinkedinIcon className="w-5 h-5" />
-            </Link>
-          )}
-          {member.twitter && (
-            <Link
-              href={member.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-500 hover:text-[#6349E8] transition-colors duration-300"
-              aria-label="Twitter Profile"
-            >
-              <TwitterIcon className="w-5 h-5" />
-            </Link>
-          )}
+        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-2 group-hover:translate-x-0">
+          {member.website && <SocialLink href={member.website} icon={GlobeIcon} />}
+          {member.linkedin && <SocialLink href={member.linkedin} icon={LinkedinIcon} />}
+          {member.twitter && <SocialLink href={member.twitter} icon={TwitterIcon} />}
         </div>
-      )}
+      </div>
 
-      {/* Bio */}
-      {member.bio && (
-        <p className="text-sm text-gray-700 leading-relaxed mb-4 flex-grow">
-          {member.bio}
-        </p>
-      )}
-
-      {/* Funded Projects */}
-      {member.fundedProjects && member.fundedProjects.length > 0 && (
-        <div className="mt-auto pt-4 border-t border-gray-200">
-          <h4 className="text-xs font-semibold text-gray-900 mb-2 uppercase tracking-wider">
-            Funded Projects
-          </h4>
-          <ul className="space-y-2">
-            {member.fundedProjects.map((project, idx) => (
-              <li key={idx}>
-                <Link
-                  href={project.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-[#6349E8] hover:text-[#5239D8] transition-colors duration-200 flex items-center group"
-                >
-                  <span className="flex-grow">{project.title}</span>
-                  <ExternalLink className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const TeamSectionComponent = ({ section }: { section: TeamSection }) => {
-  const [isExpanded, setIsExpanded] = useState(section.defaultExpanded ?? false);
-
-  // Don't render if no members
-  if (!section.members || section.members.length === 0) return null;
-
-  return (
-    <div className="mb-12">
-      {/* Section Header - Academic Style */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-4 group mb-6 hover:opacity-80 transition-opacity duration-200"
-      >
-        {/* Title */}
-        <h2 className="text-xl md:text-2xl font-semibold text-gray-900 whitespace-nowrap">
-          {section.title}
-        </h2>
-        
-        {/* Horizontal line */}
-        <div className="flex-grow h-0.5 bg-[#6349E8]"></div>
-        
-        {/* Chevron indicator */}
+      <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8">
         <div className="flex-shrink-0">
-          {isExpanded ? (
-            <ChevronUp className="w-5 h-5 text-[#6349E8]" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-[#6349E8]" />
+          <div className="relative w-24 h-24 md:w-32 md:h-32 overflow-hidden bg-gray-100 border border-black/10">
+            {member.image ? (
+              <Image
+                src={member.image}
+                alt={member.name}
+                fill
+                className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-300 font-mono text-xs">
+                NO_IMG
+              </div>
+            )}
+            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-black/30" />
+            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-black/30" />
+          </div>
+        </div>
+
+        <div className="flex-grow">
+          <h3 className="text-2xl font-serif italic mb-4 text-black group-hover:text-[#6349E8] transition-colors duration-300">
+            {member.name}
+          </h3>
+          
+          {member.bio && (
+            <p className="text-sm text-gray-600 leading-[1.8] font-light max-w-2xl border-l border-black/10 pl-4 mb-6">
+              {member.bio}
+            </p>
+          )}
+
+          {member.fundedProjects && member.fundedProjects.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-dashed border-black/10">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-gray-400 block mb-2">
+                Deployment History
+              </span>
+              <ul className="flex flex-wrap gap-3">
+                {member.fundedProjects.map((project, idx) => (
+                  <li key={idx}>
+                    <Link
+                      href={project.url}
+                      target="_blank"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-black hover:text-[#6349E8] border-b border-black/20 hover:border-[#6349E8] transition-all pb-0.5"
+                    >
+                      {project.title}
+                      <ArrowUpRight size={10} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
-      </button>
-
-      {/* Members Grid */}
-      {isExpanded && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
-          {section.members.map((member, idx) => (
-            <PersonCard key={idx} member={member} />
-          ))}
-        </div>
-      )}
+      </div>
+      
     </div>
   );
 };
+
+const SectionHeader = ({ title, isOpen, toggle }: { title: string, isOpen: boolean, toggle: () => void }) => (
+  <button 
+    onClick={toggle}
+    className="w-full flex items-center justify-between py-6 border-b border-black group transition-colors duration-300"
+  >
+    <div className="flex items-center gap-4">
+      <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${isOpen ? 'bg-[#6349E8]' : 'bg-black'}`} />
+      <h2 className="text-xl md:text-3xl font-light tracking-tight text-black group-hover:pl-4 transition-all duration-300">
+        {title}
+      </h2>
+    </div>
+    <div className="border border-black/10 rounded-full p-2 group-hover:bg-black group-hover:text-white transition-all">
+      {isOpen ? <Minus size={16} /> : <Plus size={16} />}
+    </div>
+  </button>
+);
+
+const EmptyState = () => (
+  <div className="py-12 px-6 border border-dashed border-black/20 bg-gray-50/50 flex flex-col items-center justify-center text-center">
+    <p className="text-gray-500 font-light italic">
+      Position currently vacant. We are scouting for outliers.
+    </p>
+  </div>
+);
 
 export default function TeamPage() {
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    TEAM_DATA.forEach(section => {
+      initial[section.title] = section.defaultExpanded ?? false;
+    });
+    return initial;
+  });
+
+  const toggleSection = (title: string) => {
+    setExpandedSections(prev => ({ ...prev, [title]: !prev[title] }));
+  };
+
   return (
-    <main className="min-h-screen bg-[#F0ECE5] font-sans py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Page Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4">
-            Our Team
-          </h1>
-          <p className="text-lg text-gray-600">We have one goal - helping those who want to make a difference.</p>
-        </div>
-
-        {/* Team Sections */}
-        {TEAM_DATA.map((section, idx) => (
-          <TeamSectionComponent key={idx} section={section} />
-        ))}
-
-        {/* Fallback message if no team data */}
-        {TEAM_DATA.every(section => !section.members || section.members.length === 0) && (
-          <div className="text-center py-20">
-            <p className="text-xl text-gray-600">
-              Team members will be added soon. Stay tuned!
-            </p>
+    <div className="min-h-screen bg-[#F0EEE9] text-[#1a1a1a] selection:bg-[#6349E8] selection:text-white font-sans">
+      
+      <header className="pt-24 pb-16 px-6 max-w-7xl mx-auto border-b border-black/5">
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8">
+          <div>
+            <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-[0.9]">
+              Our <span className="text-[#8B5CF6] font-serif italic">Members.</span>
+            </h1>
           </div>
-        )}
-      </div>
-    </main>
+          <p className="max-w-md text-sm md:text-base text-gray-600 leading-relaxed font-light border-l border-black pl-6">
+            We are a collective of researchers and engineers united by a single mission: 
+            <span className="font-medium text-black block mt-2">To bypass the noise and work on ideas.</span>
+          </p>
+        </div>
+      </header>
+
+      <main className="px-6 max-w-7xl mx-auto py-12">
+        {TEAM_DATA.map((section, idx) => (
+          <div key={idx} className="mb-8">
+            <SectionHeader 
+              title={section.title} 
+              isOpen={expandedSections[section.title]} 
+              toggle={() => toggleSection(section.title)} 
+            />
+            
+            <AnimatePresence>
+              {expandedSections[section.title] && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-8 pb-12 grid grid-cols-1 gap-6">
+                    {section.members && section.members.length > 0 ? (
+                      section.members.map((member, mIdx) => (
+                        <PersonCard key={mIdx} member={member} />
+                      ))
+                    ) : (
+                      <EmptyState />
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+      </main>
+
+    </div>
   );
 }

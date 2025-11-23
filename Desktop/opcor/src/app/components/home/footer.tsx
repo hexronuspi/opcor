@@ -4,7 +4,6 @@ import { Globe } from 'lucide-react';
 import Link from 'next/link';
 import {FiMail } from 'react-icons/fi';
 
-// A decorative SVG component to mimic the curves from the HAI example
 const FooterGraphic = () => (
   <svg
     width="200"
@@ -62,7 +61,7 @@ const Footer = () => (
               </h1>
             </Link>
             <p className="mt-3 text-sm text-neutral-600 max-w-4xl">
-              We are a computational intelligence research lab working towards solving some of the foundational problems in AI and Science.
+              We are an independent research institute advancing the fundamental physics of intelligence and machine autonomy.
             </p>
           </div>
           <div className="flex items-center space-x-3">

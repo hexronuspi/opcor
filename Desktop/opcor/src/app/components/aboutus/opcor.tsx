@@ -1,5 +1,5 @@
 "use client"
-import { useLayoutEffect, useRef, useState, useEffect } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -12,26 +12,11 @@ export default function OpcorPage() {
     const h2Refs = useRef<HTMLHeadingElement[]>([]);
     h2Refs.current = [];
 
-    const [fontSize, setFontSize] = useState('48px');
-
     const addToRefs = (el: HTMLHeadingElement | null) => {
         if (el && !h2Refs.current.includes(el)) {
             h2Refs.current.push(el);
         }
     };
-
-    useEffect(() => {
-        const handleResize = () => {
-            const vw = window.innerWidth * 0.10;
-            const newSize = Math.max(48, Math.min(vw, 180));
-            setFontSize(`${newSize}px`);
-        };
-
-        window.addEventListener('resize', handleResize);
-        handleResize();
-
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     useLayoutEffect(() => {
         const ctx = gsap.context(() => {
@@ -43,92 +28,145 @@ export default function OpcorPage() {
                 }
             });
 
+            tl.fromTo(".gsap-cursor-line", 
+                { scaleY: 0 }, 
+                { scaleY: 1, duration: 1.5, ease: "expo.out" }
+            );
+
             h2Refs.current.forEach((h2, index) => {
                 const prevH2 = h2Refs.current[index - 1];
                 
                 tl.call(() => {
-                    h2.classList.add('is-typing');
-                    if(prevH2) prevH2.classList.remove('is-typing');
+                    h2.classList.add('is-active');
+                    if(prevH2) prevH2.classList.remove('is-active');
                 });
 
                 tl.to(h2, {
                     text: {
                         value: h2.dataset.text || "",
+                        delimiter: "" 
                     },
-                    duration: (h2.dataset.text?.length || 0) * 0.1,
+                    duration: (h2.dataset.text?.length || 0) * 0.08, 
                     ease: 'none',
                 });
+                
+                tl.to({}, { duration: 0.3 });
             });
             
             tl.call(() => {
                 const lastH2 = h2Refs.current[h2Refs.current.length - 1];
-                if(lastH2) lastH2.classList.remove('is-typing');
+                if(lastH2) lastH2.classList.remove('is-active');
             });
+            gsap.fromTo(".gsap-manifesto-card",
+                { y: 100, opacity: 0 },
+                { 
+                    y: 0, 
+                    opacity: 1, 
+                    duration: 1.5, 
+                    ease: "power4.out",
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: "top 40%",
+                    }
+                }
+            );
 
         }, sectionRef);
 
         return () => ctx.revert();
-    }, [fontSize]);
+    }, []);
 
-    const words = ["Research", "Culture", "Real", "Problems"];
+    const words = ["RESEARCH", "CULTURE", "REAL", "PROBLEMS"];
 
     return (
-        <main className="bg-[#F0ECE5] font-sans">
+        <main className="bg-[#F2F0EB] font-sans selection:bg-[#1A237E] selection:text-white overflow-hidden">
             <style jsx global>{`
-                /* Style for the live blinking cursor */
-                .is-typing::after {
-                    content: '_';
+                /* The "Krishna Blue" Cursor */
+                .is-active::after {
+                    content: '';
                     display: inline-block;
-                    font-weight: 400; /* Lighter than the bold text */
-                    animation: blink-animation 0.7s infinite;
-                    transform: translateY(-0.1em); /* Fine-tune cursor position */
+                    width: 0.6em; /* Block cursor */
+                    height: 0.8em;
+                    background-color: #8B5CF6; 
+                    margin-left: 10px;
+                    vertical-align: baseline;
+                    animation: blink-animation 0.9s infinite;
                 }
 
                 @keyframes blink-animation {
+                    0%, 100% { opacity: 1; }
                     50% { opacity: 0; }
                 }
             `}</style>
-            <section ref={sectionRef} className="relative min-h-screen flex flex-col justify-end md:justify-start items-center md:items-start overflow-hidden p-4 sm:p-8 md:p-12">
-                <div 
-                    className="absolute bg-[#9B8AFB] z-0"
-                    style={{
-                        width: '150%',
-                        height: '150%',
-                        top: '-25%',
-                        left: '10%',
-                        transform: 'rotate(35deg)',
-                    }}
-                ></div>
 
-                <div className="absolute top-1/2 md:top-2/5 md:-left-3 -left-1 -translate-y-1/2 w-full z-0 pointer-events-none pt-[140%] md:pt-0 md:pl-[50%]">
-                    <div className="container mx-auto px-4">
-                        {words.map((word) => (
-                             <h2 
-                                key={word}
-                                ref={addToRefs} 
-                                data-text={word}
-                                style={{ 
-                                    fontSize: fontSize,
-                                    minHeight: fontSize,
-                                    lineHeight: 1, 
-                                }}
-                                className="font-bold text-gray-300 opacity-50 whitespace-nowrap"
-                            ></h2>
-                        ))}
+            <section ref={sectionRef} className="relative min-h-screen flex flex-col lg:flex-row">
+                
+                <div className="absolute inset-0 opacity-[0.04] pointer-events-none z-0 mix-blend-multiply" 
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} 
+                />
+
+                <div className="relative w-full lg:w-1/2 min-h-[60vh] lg:min-h-screen p-8 md:p-16 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-[#111]/10">
+                    
+                    <div className="gsap-cursor-line absolute left-8 md:left-16 top-0 bottom-0 w-[1px] bg-[#1A237E]/20 origin-top" />
+
+                    <div className="relative z-10 ml-6 md:ml-12">
+                        <div className="flex flex-col items-start gap-2">
+                            {words.map((word) => (
+                                <h2 
+                                    key={word}
+                                    ref={addToRefs} 
+                                    data-text={word}
+                                    className="text-6xl sm:text-7xl md:text-8xl lg:text-[7rem] xl:text-[8rem] font-bold text-[#111] leading-[0.85] tracking-tighter opacity-100"
+                                    style={{ fontVariantNumeric: 'tabular-nums' }}
+                                >
+                                </h2>
+                            ))}
+                        </div>
+
                     </div>
                 </div>
 
-                <div className="relative z-10 w-full flex justify-center md:justify-start mt-auto md:mt-0">
-                    <div className="max-w-xl md:max-w-md lg:max-w-lg p-6 rounded-lg text-gray-800">
-                        <Quote className="text-gray-600 mb-4 transform scale-x-[-1]" size={48} strokeWidth={1.5} />
-                            <p className="italic text-lg md:text-xl text-justify leading-relaxed">
-                                Our mission is to establish us as a globally unparalleled research hub, uniting a community of exceptional innovators to advance the frontier of computation and science. We are more biased towards foundational work in AI and science that drives real-world impact, and aim to set a definitive standard that rivals the best labs worldwide. We are a firm believer that merit is better than background, we evaluate talent based on the collective body of your work, not just your resume. Together, we will consistently redefine the cutting edge of our field.
-                            </p>
-                            <footer className="mt-6 text-right">
-                                <p className="font-medium text-lg">— Aditya Raj</p>
-                            </footer>
+                <div className="relative w-full lg:w-1/2 min-h-[50vh] lg:min-h-screen flex flex-col justify-center items-center p-6 md:p-16 bg-[#F2F0EB]">
+                    <div className="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none">
+                         <div className="absolute -top-[20%] -right-[20%] w-[80%] h-[80%] bg-gradient-to-b from-[#1A237E]/5 to-transparent rounded-full blur-3xl" />
+                    </div>
+                    <div className="gsap-manifesto-card relative max-w-lg w-full">
+                        
+                        <div className="absolute -left-3 -top-3 w-6 h-6 border-l border-t border-[#1A237E] opacity-50" />
+                        <div className="absolute -right-3 -bottom-3 w-6 h-6 border-r border-b border-[#1A237E] opacity-50" />
+
+                        <div className="relative bg-white border border-[#111]/5 p-8 md:p-12 shadow-[0_20px_40px_-15px_rgba(26,35,126,0.1)]">
+                            <div className="flex justify-between items-start mb-8">
+                                <Quote className="text-[#1A237E] fill-[#1A237E]/10 transform rotate-180" size={32} strokeWidth={1} />
+                                <span className="font-mono text-[10px] border border-black/10 px-2 py-1 uppercase tracking-widest text-gray-500">
+                                    The Mission
+                                </span>
+                            </div>
+
+                            <div className="space-y-6">
+                                <p className="text-lg md:text-xl font-serif leading-relaxed text-[#111] text-justify">
+                                    <span className="font-bold text-[#8B5CF6]">We do not only seek to improve but to redefine.</span> Our mission is to establish a globally unparalleled research hub, uniting exceptional innovators to advance the frontier of computation. 
+                                </p>
+                                <p className="text-lg md:text-xl font-serif leading-relaxed text-gray-600 text-justify">
+                                    We value the <span className="italic border-b border-[#1A237E]/30 text-[#111]">body of work</span> over the pedigree. We are biased towards foundational work around AI and Engineering that drives real-world impact, that can set a definitive standard that rivals the best labs in history.
+                                </p>
+                            </div>
+
+                            <div className="mt-10 pt-6 border-t border-[#111]/10 flex items-center justify-between">
+                                <div>
+                                    <p className="font-serif italic text-lg text-[#111]">Aditya</p>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
+
+                <div className="absolute inset-0 z-50 pointer-events-none flex justify-between px-6 max-w-[1800px] mx-auto">
+                    <div className="h-full w-[1px] bg-[#111]/5 hidden xl:block" />
+                    <div className="h-full w-[1px] bg-[#111]/5 hidden xl:block" />
+                </div>
+
             </section>
         </main>
     );

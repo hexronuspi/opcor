@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
-import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Plus, Minus, CornerDownRight, BookOpen } from 'lucide-react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 type TextAnswer = { type: 'text'; content: string };
 type ListAnswer = { type: 'list'; content: string[] };
@@ -11,257 +14,280 @@ type ColumnsAnswer = { type: 'columns'; content: Column[] };
 type Answer = TextAnswer | ListAnswer | ColumnsAnswer;
 type FaqItem = { question: string; answer: Answer };
 
-// Type for DOM element with animation timeline attached
-type FaqItemElement = HTMLDivElement & { animation?: gsap.core.Timeline };
-
 const faqData: FaqItem[] = [
     {
-        question: 'How can I determine if my research project is a good fit for your grant?',
+        question: 'Is my research a good fit?',
         answer: {
             type: 'text',
             content:
-                'We fund research projects through a competitive grant process, seeking to support works that needs funding and poised for take off. To be considered, researchers must submit a comprehensive proposal that outlines their project\'s core ideas and the hypotheses they aim to prove but also clearly defines the anticipated outputs upon successful achievement of their goals. It is crucial that applicants demonstrate tangible progress, as we may not fund projects that are solely in the ideation stage. Your submission should include a document of a few pages detailing the substantial amount of work already completed, which forms the foundation for the research questions you intend to solve.',
+                'We fund competitive, high-velocity research poised for execution. We do not fund pure ideation. To qualify, submit a concise proposal outlining your core hypothesis, completed groundwork, and anticipated outputs. Show us code, not just concepts.',
         },
     },
     {
-        question: 'What kind of research ideas are you looking for?',
+        question: 'What research vectors are you funding?',
         answer: {
             type: 'columns',
             content: [
                 {
-                    title: "We're looking for bold, fresh ideas in two categories:",
+                    title: "Primary Vectors",
                     items: [
-                        '**New approaches:** Research using AI to tackle real-world challenges or solving some of the foundational problems around AI.',
-                        '**New paradigms:** Empirical research exploring foundational questions on how AI can be a help to humanity. These ideas aim to create new frameworks, or principles.',
+                        '**New Approaches:** Solving foundational problems in AI, Robotics, and Compute Engineering.',
+                        '**New Paradigms:** Empirical research into safety frameworks, interpretability, and machine cognition.',
                     ],
-                },
-                {
-                    title:
-                        'Whether a new approach or a new paradigm, we seek ideas tackling foundational challenges:',
-                    items: [
-                        '**Memory:** Enhancing collaboration with AI by improving information retention and recall. We believe that the future of AI is collaborative and it should augment human intelligence.',
-                        '**Intelligence:** Are models really capable of thinking? If so, how can we measure and evaluate this capability and to what extent?',
-                        '**Safety:** Is the current direction of AI Safety sufficient to address potential risks and challenges? If not, what do you propose?',
-                        '**Future:** Is there a future where AI can seamlessly integrate into our daily lives while respecting privacy and ethical considerations?',
-                        '**Attacks:** How can we better defend against adversarial attacks on AI systems? Is there a foundational way to block all attacks?',
-                    ],
-                },
+                }
             ],
         },
     },
     {
-        question: 'Who can participate?',
+        question: 'Who is eligible to apply?',
         answer: {
             type: 'text',
             content:
-                'This call for research is open to any one who can contribute to the field of AI and its applications, We only care about your proposal and your past related work to support the proposal. We do not care about anything else.',
+                'Currently we focus only on people who live in India.  Researchers, students, or dropouts. We evaluate based on your proposal and proof of capability (GitHub/Papers). We do not care about credentials, university rankings, or GPA.',
         },
     },
     {
-        question: 'Why should I participate?',
+        question: 'Why apply for an OPCOR grant?',
         answer: {
             type: 'list',
             content: [
-                'Receive funding and support for your research.',
-                'Contribute to foundational research in computation and science.',
-                'Collaborate with fellow researchers and learn from each other.',
+                'Fast, bureaucracy-free funding.',
+                'Access to compute resources.',
+                'Network with high-agency builders and researchers.',
+                'Total autonomy over your work.',
             ],
         },
     },
     {
-        question: 'Will the funds be monitored or audited?',
+        question: 'Are there spending restrictions or audits?',
         answer: {
             type: 'text',
             content:
-                'Our funding is available to individuals who are 18 years of age or older on the date of receiving the grant. We operate on a principle of trust, and as such, we generally do not require information on where you choose to utilize the funds. You have the autonomy to use the grant to advance your research or for personal purposes. We encourage you to reflect on whether your use of the funds aligns with your personal values and goals, and we trust you to make the decision that is right for you. For larger grants, we may opt to disburse the amount in installments. While the first installment is provided directly, the release of subsequent payments may require the submission of a progress report to ensure milestones are being met.',
-        },
-    },
-        {
-        question: 'What will be the size of the grants and how many projects do you plan to fund?',
-        answer: {
-            type: 'text',
-            content:
-                'This is a self funded project, The grants are directly given from the founder\'s personal funds, at this stage we do not have a fixed grant size or a specific number of projects in mind. We are open to proposals of varying scopes and will evaluate each one on its own merits. It is safe to assume that we can choose between 0-1 projects each month and the grant will be enough to cover at least compute costs and some additional expenses.',
+                'We operate on trust. If you are 18+, you have full autonomy to use the funds for research or personal sustenance. For larger grants, funds may be tranche-based, contingent on milestone progress reports. We trust you to make the right decisions for your work.',
         },
     },
     {
-        question: 'Why is the funding model this way?',
+        question: 'Do you take equity or IP?',
         answer: {
             type: 'text',
             content:
-                'This is giving back to the society and fostering innovation in the field of computing and science, by supporting researchers and projects that may not receive funding through traditional channels due to various constraints.',
+                'No. We take zero equity and claim no IP. We only ask that you open-source your findings to accelerate the field. We encourage, but do not strictly require, citing OPCOR in your published work.',
         },
     },
-        {
-        question: 'I want to give you funds to support this cause, how can I do that?',
+    {
+        question: 'What is the grant size?',
         answer: {
             type: 'text',
             content:
-                'We do not accept direct donations at this time. However, we appreciate your support and encourage you to fill the form under join us to become an external collaborator. We will redirect the projects which need funding and it\'s up to you to independently fund them.',
+                'As a self-funded initiative, we do not have fixed grant sizes. Awards typically cover compute costs + living expenses. We currently fund 0-1 high-conviction projects per month.',
         },
     },
-        {
-        question: 'The FAQ only has answers for AI-related questions, what if I have a different project in mind?',
+    {
+        question: 'How can I support OPCOR?',
         answer: {
             type: 'text',
             content:
-                'Our primary mission is to accelerate progress in AI and science. As a self-funded initiative, we must concentrate our resources on projects that align closely with these core areas to maximize our impact. We believe deeply in the value of interdisciplinary work and are open to reviewing innovative proposals from adjacent fields. However, please keep in mind that until we secure additional backing, our capacity to fund projects outside of computation and science will be limited. We encourage you to apply if you believe your work represents a fundamental breakthrough.',
+                'We do not accept direct donations. However, we invite external collaborators to co-fund specific projects. If you want to back a specific researcher we have vetted, please contact us directly.',
         },
     }
 ];
 
-const Faq = () => {
-    const [activeIndex, setActiveIndex] = useState<number | null>(2);
-    const container = useRef(null);
-
-    useGSAP(() => {
-        gsap.utils.toArray<FaqItemElement>(
-            '.faq-item'
-        ).forEach((item, index) => {
-            const answer = item.querySelector('.faq-answer');
-            const icon = item.querySelector('.faq-icon');
-
-            gsap.set(answer, { height: 'auto' });
-            const tl = gsap
-                .timeline({ paused: true })
-                .fromTo(
-                    answer,
-                    { height: 0, opacity: 0, duration: 0.3, ease: 'power1.inOut' },
-                    { height: 'auto', opacity: 1, duration: 0.3, ease: 'power1.inOut' }
+const RenderBoldText = ({ text }: { text: string }) => {
+    const parts = text.split('**');
+    return (
+        <>
+            {parts.map((part, i) =>
+                i % 2 === 1 ? (
+                    <span key={i} className="font-semibold text-[#1A237E]">
+                        {part}
+                    </span>
+                ) : (
+                    part
                 )
-                .to(icon, { rotation: 45, duration: 0.3, ease: 'power1.inOut' }, 0);
+            )}
+        </>
+    );
+};
 
-            // Attach timeline to DOM node for later control
-            item.animation = tl;
+const AccordionItem = ({ 
+    item, 
+    index, 
+    isOpen, 
+    toggle 
+}: { 
+    item: FaqItem; 
+    index: number; 
+    isOpen: boolean; 
+    toggle: () => void 
+}) => {
+    const contentRef = useRef<HTMLDivElement>(null);
+    const innerRef = useRef<HTMLDivElement>(null);
 
-            if (activeIndex === index) {
-                tl.play();
-            }
-        });
-    }, { scope: container });
+    useEffect(() => {
+        if (!contentRef.current || !innerRef.current) return;
 
+        const tl = gsap.timeline({ defaults: { ease: "power3.inOut" } });
 
-    const toggleFaq = (index: number) => {
-        const newActiveIndex = activeIndex === index ? null : index;
-        setActiveIndex(newActiveIndex);
+        if (isOpen) {
+            gsap.set(contentRef.current, { height: 'auto' });
+            gsap.from(contentRef.current, { height: 0, duration: 0.4, ease: "expo.out" });
+            
+            gsap.fromTo(innerRef.current, 
+                { y: 15, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.5, delay: 0.1 }
+            );
+        } else {
+            gsap.to(contentRef.current, { height: 0, duration: 0.3, ease: "power3.inOut" });
+            gsap.to(innerRef.current, { opacity: 0, duration: 0.2 });
+        }
 
-        gsap.utils.toArray<FaqItemElement>(
-            '.faq-item'
-        ).forEach((item, i) => {
-            if (i === newActiveIndex) {
-                item.animation?.play();
-            } else {
-                item.animation?.reverse();
-            }
-        });
-    };
-
-    const renderBoldText = (text: string) => {
-        const parts = text.split('**');
-        return (
-            <>
-                {parts.map((part, i) =>
-                    i % 2 === 1 ? (
-                        <strong key={i} className="font-medium text-gray-900 text-lg">
-                            {part}
-                        </strong>
-                    ) : (
-                        part
-                    )
-                )}
-            </>
-        );
-    };
+        return () => { tl.kill(); };
+    }, [isOpen]);
 
     const renderAnswer = (answer: Answer) => {
         switch (answer.type) {
             case 'text':
-                return <p className="text-lg text-gray-700">{answer.content}</p>;
+                return <p className="text-lg md:text-xl font-serif text-gray-700 leading-relaxed max-w-4xl">{answer.content}</p>;
             case 'list':
                 return (
-                    <ul className="list-disc list-inside space-y-3 text-lg text-gray-700">
-                        {answer.content.map((item, index) => (
-                            <li key={index}>{item}</li>
+                    <ul className="space-y-4 text-lg md:text-xl font-serif text-gray-700 leading-relaxed">
+                        {answer.content.map((li, i) => (
+                            <li key={i} className="flex items-start gap-3">
+                                <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-[#1A237E] flex-shrink-0" />
+                                <span>{li}</span>
+                            </li>
                         ))}
                     </ul>
                 );
             case 'columns':
                 return (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                        {answer.content.map((column, colIndex) => (
-                            <div key={colIndex}>
-                                <h3 className="font-heading font-semibold text-lg mb-3 text-gray-900">
-                                    {column.title}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 border-t border-[#111]/10 pt-6 mt-4">
+                        {answer.content.map((col, i) => (
+                            <div key={i} className="relative">
+                                {i === 1 && <div className="hidden lg:block absolute -left-6 top-0 bottom-0 w-[1px] bg-[#111]/10" />}
+                                
+                                <h3 className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-4">
+                                    {col.title}
                                 </h3>
-                                <ul className="space-y-4 text-lg text-gray-700">
-                                    {column.items.map((item, itemIndex) => (
-                                        <li key={itemIndex}>{renderBoldText(item)}</li>
+                                <ul className="space-y-4">
+                                    {col.items.map((it, j) => (
+                                        <li key={j} className="text-base md:text-lg font-serif text-gray-700 leading-relaxed">
+                                            <RenderBoldText text={it} />
+                                        </li>
                                     ))}
                                 </ul>
                             </div>
                         ))}
                     </div>
                 );
-            default:
-                return null;
+            default: return null;
         }
     };
 
     return (
-        <section className="bg-[#F0ECE5] py-24 sm:py-32 font-sans">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div ref={container} className="space-y-6">
-                    {faqData.map((faq, index) => (
-                        <div
-                            key={index}
-                            className="faq-item bg-[#F0ECE5] border border-blue-200 rounded-lg shadow-sm overflow-hidden"
-                        >
-                            <button
-                                onClick={() => toggleFaq(index)}
-                                className="w-full flex justify-between items-start text-left p-6 md:px-8 md:py-5"
-                                aria-expanded={activeIndex === index}
-                                aria-controls={`faq-answer-${index}`}
-                            >
-                                <span className="block text-[20px] md:text-[22px] font-heading font-semibold text-gray-900 leading-snug">
-                                    {faq.question}
-                                </span>
-                                <span className="faq-icon text-gray-500">
-                                    <svg
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="transform"
-                                    >
-                                        <path
-                                            d="M12 5V19"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        />
-                                        <path
-                                            d="M5 12H19"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        />
-                                    </svg>
-                                </span>
-                            </button>
-                            <div
-                                id={`faq-answer-${index}`}
-                                className="faq-answer overflow-hidden h-0 opacity-0"
-                            >
-                                <div className="px-6 pb-8 md:px-8 md:pb-6 text-base md:text-lg text-gray-700 leading-relaxed">
-                                    {renderAnswer(faq.answer)}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+        <div className="group border-t border-[#111]/10 first:border-t-0">
+            <button
+                onClick={toggle}
+                className={`w-full py-8 flex flex-col md:flex-row gap-6 md:gap-12 items-start text-left transition-all duration-300 ${isOpen ? 'bg-white/60 -mx-4 px-4 rounded-lg shadow-sm' : 'hover:bg-white/40 hover:px-4 hover:-mx-4 hover:rounded-lg'}`}
+            >
+                <div className="md:w-24 flex-shrink-0 pt-1">
+                    <span className={`font-mono text-xs tracking-widest transition-colors duration-300 ${isOpen ? 'text-[#1A237E] font-bold' : 'text-gray-400'}`}>
+                        {(index + 1).toString().padStart(2, '0')}
+                    </span>
                 </div>
+
+                <div className="flex-grow">
+                    <h3 className={`text-xl md:text-2xl font-medium tracking-tight leading-snug transition-colors duration-300 ${isOpen ? 'text-[#1A237E]' : 'text-[#111]'}`}>
+                        {item.question}
+                    </h3>
+                </div>
+
+                <div className="flex-shrink-0 pt-1">
+                    <div className={`relative w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-500 ${isOpen ? 'border-[#1A237E] bg-[#1A237E] text-white rotate-180' : 'border-[#111]/20 text-[#111] rotate-0'}`}>
+                        {isOpen ? <Minus size={14} /> : <Plus size={14} />}
+                    </div>
+                </div>
+            </button>
+
+            <div ref={contentRef} className="h-0 overflow-hidden">
+                <div ref={innerRef} className="pl-0 md:pl-[calc(6rem+12px)] pr-4 md:pr-12 pb-10 opacity-0">
+                   <div className="mb-4 opacity-30">
+                        <CornerDownRight size={16} className="text-[#1A237E]" />
+                   </div>
+                   {renderAnswer(item.answer)}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const Faq = () => {
+    const [activeIndex, setActiveIndex] = useState<number | null>(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!containerRef.current) return;
+        const ctx = gsap.context(() => {
+            gsap.from(".gsap-faq-header", {
+                y: 30,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.1,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top 80%"
+                }
+            });
+        }, containerRef);
+        return () => ctx.revert();
+    }, []);
+
+    return (
+        <section 
+            ref={containerRef} 
+            className="relative bg-[#F2F0EB] py-24 md:py-32 min-h-screen font-sans selection:bg-[#8B5CF6] selection:text-white"
+        >
+             <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-0 mix-blend-multiply" 
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} 
+            />
+
+            <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-8">
+                <div className="mb-16 grid grid-cols-1 md:grid-cols-12 gap-8 border-b border-[#111]/10 pb-8">
+                    <div className="md:col-span-3">
+                         <div className="gsap-faq-header flex items-center gap-2 text-[#8B5CF6]">
+                            <BookOpen size={16} />
+                            <span className="font-mono text-xs uppercase tracking-widest font-bold">Protocol</span>
+                         </div>
+                    </div>
+                    <div className="md:col-span-9">
+                        <h2 className="gsap-faq-header text-4xl md:text-6xl font-bold tracking-tighter text-[#111] mb-6">
+                            Common <span className="font-serif italic font-light text-[#8B5CF6]">Inquiries</span>
+                        </h2>
+                        <p className="gsap-faq-header text-base md:text-lg text-gray-500 max-w-xl font-light leading-relaxed">
+                            Clarifications regarding the grant mechanics, evaluation criteria, and funding philosophy.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="w-full">
+                    {faqData.map((item, index) => (
+                        <AccordionItem 
+                            key={index} 
+                            index={index} 
+                            item={item} 
+                            isOpen={activeIndex === index} 
+                            toggle={() => setActiveIndex(activeIndex === index ? null : index)} 
+                        />
+                    ))}
+                    <div className="w-full h-[1px] bg-[#8B5CF6]/10" />
+                </div>
+                <div className="mt-16 text-center">
+                    <p className="font-mono text-xs text-gray-400 uppercase tracking-widest">
+                        Still have questions? <a href="mailto:hexronus@gmail.com" className="text-[#8B5CF6] border-b border-[#8B5CF6] hover:border-transparent transition-all">Direct Contact</a>
+                    </p>
+                </div>
+
             </div>
         </section>
     );

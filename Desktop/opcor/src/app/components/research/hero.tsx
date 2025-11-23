@@ -1,137 +1,182 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Plus, Cpu, Bot, Brain, Shield, Lock } from 'lucide-react';
+import { TbEngine } from 'react-icons/tb';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const researchData = [
   {
-    title: 'Memory',
-    short: 'We believe that the future of AI is collaborative and it should augment human intelligence.',
+    id: '01',
+    title: 'Robotics',
+    category: 'EMBODIED AI',
+    icon: Bot,
+    short: 'Bridging the gap between simulation and reality. We fund research into general-purpose manipulation, quadrupedal locomotion, and end-to-end visuomotor control policies.',
   },
   {
+    id: '02',
+    title: 'Mechanical',
+    category: 'KINEMATICS',
+    icon: Cpu,
+    short: 'Reimagining actuation. High-torque density motors, soft robotics, and bio-mimetic structures that allow machines to interact safely and fluidly with the physical world.',
+  },
+  {
+    id: '03',
     title: 'Intelligence',
-    short: 'Exploring the boundaries of machine cognition and develop frameworks to assess genuine reasoning versus pattern matching.',
+    category: 'COGNITION',
+    icon: Brain,
+    short: 'Beyond pattern matching. Exploring neuro-symbolic architectures and reasoning frameworks to assess whether models truly understand the world or merely mimic it.',
   },
   {
+    id: '04',
     title: 'Safety',
-    short: 'AI will be used extensively, what are we doing to address AI risks and propose new safety paradigms.',
+    category: 'ALIGNMENT',
+    icon: Shield,
+    short: 'Formal verification and interpretability. We treat safety as an engineering constraint, not an afterthought. How do we mathematically guarantee system behavior?',
   },
   {
-    title: 'Future',
-    short: 'AI will integrate into our lives, but we must ensure it respects privacy and ethics. Cloud based models will store data, is there a risk of misuse? How to prevent it?',
-  },
-  {
+    id: '05',
     title: 'Attacks',
-    short: 'Researching defense mechanisms and exploring whether universal protection is theoretically and practically achievable.',
+    category: 'ADVERSARIAL',
+    icon: Lock,
+    short: 'Red-teaming the future. Researching universal defense mechanisms against prompt injection, model poisoning, and extraction attacks in open-weight systems.',
   },
   {
-    title: 'Science',
-    short: 'Investigating the usage of AI with Science and taking a multidisciplinary approach.',
+    id: '06',
+    title: 'Engineering',
+    category: 'DISCOVERY',
+    icon: TbEngine,
+    short: 'AI for Engineering. Accelerating physics simulations and related concepts. Using compute to solve hard scientific problems.',
   },
-
 ];
 
-const ResearchCard = ({ 
-  item, 
-  index, 
-}: { 
-  item: typeof researchData[0], 
-  index: number
-}) => {
+const GridCrosshair = () => (
+  <div className="absolute -top-3 -left-3 w-6 h-6 flex items-center justify-center z-20 pointer-events-none text-black/20">
+    <Plus strokeWidth={1} size={16} />
+  </div>
+);
+
+const ResearchNode = ({ item }: { item: typeof researchData[0] }) => {
+  const Icon = item.icon;
 
   return (
-    <div className="gsap-research-item w-full h-full">
-      <div className="group relative h-full bg-gradient-to-br from-white/90 to-gray-50/80 backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200/50 hover:border-[#6349E8]/30 overflow-hidden flex flex-col">
-        
-        {/* Index number background */}
-        <div className="absolute -right-2 -top-2 md:-right-4 md:-top-4 text-[60px] md:text-[80px] lg:text-[100px] font-black text-gray-100/70 opacity-50 select-none group-hover:text-[#6349E8]/20 transition-colors duration-500">
-          {index + 1}
+    <div className="gsap-node group relative min-h-[320px] flex flex-col justify-between p-8 border-l border-t border-black/10 transition-colors duration-500 hover:bg-[#0a0a0a] hover:border-transparent">
+      
+      <GridCrosshair />
+
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+      <div className="relative z-10 flex justify-between items-start">
+        <div className="flex flex-col gap-1">
+            <span className="font-mono text-[10px] tracking-widest uppercase text-gray-500 group-hover:text-purple-400 transition-colors">
+            {item.id} {item.category}
+            </span>
+            <Icon size={24} strokeWidth={1} className="mt-2 text-black group-hover:text-white transition-colors duration-500" />
         </div>
         
-        <div className="relative z-10 flex flex-col h-full">
-          <h3 className="text-lg md:text-xl lg:text-2xl font-black mb-2 md:mb-3 text-black">
-            {item.title}
-          </h3>
-          
-          <p className="text-xs md:text-sm font-medium text-gray-600 mb-3 leading-relaxed">
-            {item.short}
-          </p>
-                    
-        
-        </div>
       </div>
+
+      <div className="relative z-10 mt-12">
+        <h3 className="text-3xl font-medium tracking-tight mb-4 text-[#1a1a1a] group-hover:text-white transition-colors duration-300">
+          {item.title}
+        </h3>
+        <p className="font-mono text-xs md:text-sm text-gray-600 leading-relaxed group-hover:text-gray-400 transition-colors duration-300 max-w-sm">
+          {item.short}
+        </p>
+      </div>
+
+      <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-purple-600 group-hover:w-full transition-all duration-700 ease-out" />
     </div>
   );
 };
 
 const ResearchHero = () => {
-  const componentRef = useRef<HTMLDivElement>(null);
-  const [, setIsMobile] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  useEffect(() => {
-    if (!componentRef.current) return;
+    if (!containerRef.current) return;
 
     const ctx = gsap.context(() => {
-      ScrollTrigger.refresh();
       
-      // Fade in animation for cards
-      gsap.from('.gsap-research-item', { 
-        opacity: 0, 
-        y: 30,
-        stagger: 0.15, 
-        duration: 0.8,
-        ease: 'power3.out'
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 70%",
+          end: "bottom bottom",
+        }
       });
-    }, componentRef);
+
+      tl.from(headerRef.current, {
+        opacity: 0,
+        y: 50,
+        duration: 1,
+        ease: "power3.out"
+      });
+
+      tl.from(".gsap-node", {
+        opacity: 0,
+        y: 20,
+        duration: 0.8,
+        stagger: {
+          amount: 0.6,
+          grid: [2, 3],
+          from: "start"
+        },
+        ease: "expo.out"
+      }, "-=0.5");
+
+    }, containerRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
     <section 
-      ref={componentRef} 
-      className="relative w-full min-h-screen bg-[#F0EEE9] overflow-hidden flex items-center"
+      ref={containerRef} 
+      className="relative w-full min-h-screen bg-[#F0EEE9] text-[#1a1a1a] py-24 md:py-32 overflow-hidden selection:bg-purple-500 selection:text-white"
     >
-      {/* Background gradient layers */}
       <div 
-        className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#d9d3ff] to-[#C0B7F8]"
-        style={{ clipPath: 'polygon(0 0, 15% 0, 60% 60%, 0% 100%)' }}
+        className="absolute inset-0 opacity-[0.15] pointer-events-none" 
+        style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }}
       ></div>
+      
+      <div className="absolute top-20 right-0 pointer-events-none opacity-[0.03] select-none">
+        <span className="text-[20vw] leading-none font-bold tracking-tighter">AREAS</span>
+      </div>
 
-      <div className="relative z-10 w-full">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
-          <div className="mb-8 md:mb-10">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 text-[#1a1a1a]">
+
+      <div className="max-w-[1400px] mx-auto px-6 relative z-10">
+        
+        <div ref={headerRef} className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-black/5 rounded-full mb-6">
+                <span className="w-2 h-2 bg-purple-600 rounded-full animate-pulse"/>
+                <span className="font-mono text-xs uppercase tracking-widest font-semibold text-black/60">Research Vectors</span>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[0.95] mb-6">
+              Frontiers of <br />
+              <span className="text-purple-700 italic font-serif">Applied</span> Intelligence.
             </h1>
-            <p className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed max-w-6xl">
-              At Open Collective Research, we explore the frontiers of computation and science through grant making and collaboration. 
-              Our work spans critical areas that shape the future of AI—from understanding machine cognition to ensuring safety, 
-              defending against adversarial threats, and building systems that enhance human capabilities while respecting privacy and ethics in all possible use cases.
-            </p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 auto-rows-fr">
-            {researchData.map((item, index) => (
-              <ResearchCard key={index} item={item} index={index} />
-            ))}
-          </div>
-          
-          <div className="mt-6 md:mt-8">
-            <p className="text-sm md:text-base text-gray-600 text-center leading-relaxed">
-              <span className="font-semibold">Note:</span> We are still in progress, we will open grant application by 1st January, 2026. All projects and publications can be found here, once funded, completed/in progress.
+          <div className="max-w-md font-mono text-xs md:text-sm text-gray-600 leading-relaxed border-l-2 border-purple-600 pl-6">
+            <p>
+              Traditional academia rewards the cautious. We fund the reckless. 
+              Deploying capital into high-entropy research domains: Engineering and AI.
             </p>
           </div>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-r border-b border-black/10">
+          {researchData.map((item, index) => (
+            <ResearchNode key={index} item={item} />
+          ))}
+        </div>
+
       </div>
     </section>
   );
