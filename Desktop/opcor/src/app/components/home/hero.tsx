@@ -4,8 +4,6 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FaGear } from "react-icons/fa6";
-import { BsGearWideConnected } from "react-icons/bs";
-import { GoGear } from "react-icons/go";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -83,20 +81,6 @@ const GearsAnimation = () => {
         ease: "none"
       });
       
-      gsap.to(".gear-ccw-slow", {
-        rotation: -360,
-        duration: 25,
-        repeat: -1,
-        ease: "none"
-      });
-
-      gsap.to(".gear-cw-medium", {
-        rotation: 360,
-        duration: 20,
-        repeat: -1,
-        ease: "none"
-      });
-
       gsap.to(".gear-item", {
         y: -15,
         duration: 3,
@@ -116,19 +100,19 @@ const GearsAnimation = () => {
   return (
     <div ref={containerRef} className="absolute right-0 top-0 h-full w-[40%] hidden lg:flex flex-col items-end justify-center gap-12 pr-12 pointer-events-none z-0 opacity-20 overflow-hidden">
       <div className="gear-item relative right-12">
-        <FaGear className="gear-cw-fast text-[8rem] text-slate-400" />
+        <FaGear className="gear-cw-fast text-[8rem] text-slate-600" />
       </div>
       
-      <div className="gear-item relative right-24 -mt-8">
-        <BsGearWideConnected className="gear-ccw-slow text-[12rem] text-slate-300" />
+      <div className="gear-item relative right-24 -mt-16">
+        <FaGear className="gear-cw-fast text-[12rem] text-slate-800" />
       </div>
       
-      <div className="gear-item relative right-8 -mt-4">
-        <GoGear className="gear-cw-medium text-[10rem] text-slate-400" />
+      <div className="gear-item relative right-8 -mt-16">
+        <FaGear className="gear-cw-fast text-[10rem] text-slate-600" />
       </div>
 
-      <div className="gear-item relative right-32 -mt-12">
-        <FaGear className="gear-cw-fast text-[5rem] text-slate-300" />
+      <div className="gear-item relative right-32 -mt-14">
+        <FaGear className="gear-cw-fast text-[8rem] text-slate-800" />
       </div>
     </div>
   );
